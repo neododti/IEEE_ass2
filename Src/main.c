@@ -127,6 +127,24 @@ void setup(int s)
 	TIM2->CR1 |= 1;
 }
 
+/**
+ * @brief Prints a string via USART2
+ * @param str: String to print
+ */
+void print(const char *str)
+{
+	while (*str)
+	{
+		// Wait until TXE (Transmit Empty) is 1
+		// This is Bit 7 of the Status Register (SR)
+		while (!(USART2->SR & (1 << 7)))
+			;
+
+		// Push a character directly into the Data Register (DR)
+		USART2->DR = *str++;
+	}
+}
+
 int main(void)
 {
 	setup(1); // Initialize system with 1s toggle rate
@@ -138,13 +156,7 @@ int main(void)
 		{
 			TIM2->SR &= ~1; // Reset flag
 
-			// Wait until TXE (Transmit Empty) is 1
-			// This is Bit 7 of the Status Register (SR)
-			while (!(USART2->SR & (1 << 7)))
-				;
-
-			// Push a character directly into the Data Register (DR)
-			USART2->DR = 'A';
+			print("Hello world!\n\r"); // Print "Hello world!" every second
 		}
 	}
 
